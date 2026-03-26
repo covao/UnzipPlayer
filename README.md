@@ -1,9 +1,8 @@
 ## Overview
 UnzipPlayer is a browser-based media player that extracts and plays audio/video files directly from ZIP archives
-![Demo](unzipplayer.gif)
-
 ## Quick Start
-[Start UnzipPlayer Demo](https://covao.github.io/UnzipPlayer/unzipplayer.html?zip=https://github.com/covao/UnzipPlayer/blob/main/sample_mp3.zip)
+[Start UnzipPlayer Demo](https://covao.github.io/UnzipPlayer/unzipplayer.html?zip=https://raw.githubusercontent.com/covao/UnzipPlayer/main/sample_mp3.zip)
+![Demo](unzipplayer.gif)
 
 ## Features
 - Single HTML file — no build step, no dependencies to install
@@ -18,14 +17,6 @@ UnzipPlayer is a browser-based media player that extracts and plays audio/video 
 - URL parameter loading (`?zip=` or `?file=`)
 - Dark theme UI with list and grid views
 - Works on `file://` protocol — no local server needed
-
-## Installation
-
-No installation required. It's a single HTML file.
-
-## Uninstallation
-
-Delete the file.
 
 ## Usage
 
