@@ -197,6 +197,35 @@
     .dropzone-icon{font-size:40px;}
     .dropzone-title{font-size:17px;}
   }
+
+  /* =========================================================
+     Embed Mode (iframe埋め込み用): タイトル表示 + 操作部の2段レイアウト
+     ========================================================= */
+  body.embed-mode{height:auto;min-height:0;overflow:visible;}
+  body.embed-mode .header,
+  body.embed-mode .sidebar,
+  body.embed-mode .file-browser,
+  body.embed-mode .video-maximize,
+  body.embed-mode .video-close{display:none !important;}
+  body.embed-mode .main{flex:none;overflow:visible;}
+  body.embed-mode .content{flex:none;overflow:visible;}
+  body.embed-mode .dropzone-wrapper{padding:16px;}
+  body.embed-mode .video-container{max-height:none;}
+  body.embed-mode .video-container video{max-height:40dvh;max-height:40vh;}
+  body.embed-mode .player-bar{
+    display:none;flex-direction:row;flex-wrap:wrap;row-gap:8px;
+    border-top:none;padding:10px 14px;
+  }
+  body.embed-mode .player-bar.visible{display:flex;}
+  /* 1段目: タイトル表示 */
+  body.embed-mode .player-info{
+    order:1;flex:1 1 100%;max-width:none;min-width:0;
+    padding-bottom:8px;border-bottom:1px solid var(--border);
+  }
+  /* 2段目: プレーヤー操作部(再生コントロール + シークバー + 音量) */
+  body.embed-mode .player-controls{order:2;}
+  body.embed-mode .player-progress{order:3;flex:1 1 auto;min-width:80px;}
+  body.embed-mode .volume-control{order:4;display:flex;}
 </style>
 </head>
 <body>
@@ -524,6 +553,20 @@ function submitPassword(){
 }
 
 // =========================================================
+// Embed Mode (iframe埋め込み用)
+// =========================================================
+var embedMode=false;
+function checkEmbedMode(){
+  var params=new URLSearchParams(window.location.search);
+  var v=params.get('embed');
+  embedMode=(v==='1'||v==='true');
+  if(embedMode){
+    document.body.classList.add('embed-mode');
+    document.getElementById('playerBar').classList.add('visible');
+  }
+}
+
+// =========================================================
 // URL Params
 // =========================================================
 async function loadFromURLParams(){
@@ -548,6 +591,10 @@ function updateUI(){
   document.getElementById('dropzoneWrapper').style.display='none';
   document.getElementById('fileBrowser').classList.add('visible');
   renderFiles();
+  if(embedMode){
+    document.getElementById('playerBar').classList.add('visible');
+    if(!currentPlaying&&playlist.length>0)playFile(playlist[0]);
+  }
 }
 
 function renderFiles(){
@@ -729,6 +776,7 @@ zip.configure({ useWebWorkers: false });
 audioPlayer.volume=0.7;videoPlayer.volume=0.7;
 captureDurationFromPlayer(audioPlayer);
 captureDurationFromPlayer(videoPlayer);
+checkEmbedMode();
 loadFromURLParams();
 </script>
 </body>

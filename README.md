@@ -47,6 +47,19 @@ media-manager.html?file=https://example.com/song1.mp3&file=https://example.com/s
 | Ctrl + → | Next track |
 | Ctrl + ← | Previous track |
 
+###Iframe Embed Mode
+
+Add embed=1 (or embed=true) to the URL to switch to a compact player suited for embedding in an <iframe>. In this mode the header, folder sidebar, and file browser are hidden, and the player bar is rendered as a 2-row layout: the track title on the first row and the playback controls (shuffle / prev / play-pause / next / repeat / seek bar / volume) on the second row. If a ZIP or file is supplied via ?zip= / ?file=, the first track starts playing automatically.
+
+```html
+<iframe
+  src="https://covao.github.io/UnzipPlayer/unzipplayer.html?zip=https://raw.githubusercontent.com/covao/UnzipPlayer/main/sample_mp3.zip"
+  width="720" height="480" frameborder="0" allow="autoplay">
+</iframe>
+```
+
+You can combine embed=1 with zip= or file= params, or leave them out and drop a ZIP onto the embedded player manually.
+
 ### Supported Formats
 
 | Type | Extensions |
@@ -54,4 +67,7 @@ media-manager.html?file=https://example.com/song1.mp3&file=https://example.com/s
 | Audio | `.mp3` `.wav` `.ogg` `.aac` `.flac` `.m4a` `.wma` |
 | Video | `.mp4` `.webm` `.mkv` `.avi` `.mov` `.m4v` `.ogv` |
 | Archive | `.zip` (standard and encrypted) |
+
+
+
 
