@@ -47,7 +47,7 @@ media-manager.html?file=https://example.com/song1.mp3&file=https://example.com/s
 | Ctrl + → | Next track |
 | Ctrl + ← | Previous track |
 
-###Iframe Embed Mode
+### Iframe Embed Mode
 
 Add embed=1 (or embed=true) to the URL to switch to a compact player suited for embedding in an <iframe>. In this mode the header, folder sidebar, and file browser are hidden, and the player bar is rendered as a 2-row layout: the track title on the first row and the playback controls (shuffle / prev / play-pause / next / repeat / seek bar / volume) on the second row. If a ZIP or file is supplied via ?zip= / ?file=, the first track starts playing automatically.
 
