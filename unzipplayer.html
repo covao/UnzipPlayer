@@ -770,6 +770,95 @@ document.addEventListener('keydown',function(e){
 });
 
 // =========================================================
+// Hash Command API
+// リロード無しでURLハッシュにより外部制御するコマンド機能
+//   #cmd=play                              再生(現トラックを再開、無ければ先頭を再生)
+//   #cmd=stop                              停止(一時停止して0秒に戻す)
+//   #cmd=playat&path=<曲パス>&t=<秒>        指定曲の時刻tから再生
+//   #cmd=fadeout                           1.5秒かけてフェードアウトし停止
+//   #cmd=fadein&path=<曲パス>&t=<秒>        指定曲の時刻tから1.5秒かけてフェードインして再生
+// =========================================================
+var FADE_MS=1500,fadeRAF=null;
+function clearFade(){if(fadeRAF){cancelAnimationFrame(fadeRAF);fadeRAF=null;}}
+function fadeVolume(el,from,to,duration,onDone){
+  clearFade();
+  var start=null;
+  el.volume=from;
+  function step(ts){
+    if(start===null)start=ts;
+    var p=Math.min(1,(ts-start)/duration);
+    el.volume=from+(to-from)*p;
+    if(p<1){fadeRAF=requestAnimationFrame(step);}
+    else{fadeRAF=null;if(onDone)onDone();}
+  }
+  fadeRAF=requestAnimationFrame(step);
+}
+function resolvePlayerFor(path){return getMediaType(path.split('/').pop())==='video'?videoPlayer:audioPlayer;}
+function whenReady(el,fn){if(el.readyState>=1)fn();else el.addEventListener('loadedmetadata',fn,{once:true});}
+
+function cmdPlay(){
+  clearFade();
+  var a=getActivePlayer();
+  if(!a){if(playlist.length>0)playFile(playlist[0]);return;}
+  a.volume=audioPlayer.volume||0.7;
+  a.play();
+}
+function cmdStop(){
+  clearFade();
+  var a=getActivePlayer();
+  if(!a)return;
+  a.pause();a.currentTime=0;
+}
+function cmdPlayAt(path,t){
+  if(!path||!mfs.getFile(path)){showToast('File not found: '+path,true);return;}
+  clearFade();
+  playFile(path);
+  var a=resolvePlayerFor(path);
+  whenReady(a,function(){if(t!=null&&!isNaN(t))a.currentTime=t;});
+}
+function cmdFadeOut(){
+  var a=getActivePlayer();
+  if(!a||a.paused)return;
+  var restoreVol=audioPlayer.volume||0.7;
+  fadeVolume(a,a.volume,0,FADE_MS,function(){
+    a.pause();a.currentTime=0;a.volume=restoreVol;
+  });
+}
+function cmdFadeIn(path,t){
+  if(!path||!mfs.getFile(path)){showToast('File not found: '+path,true);return;}
+  clearFade();
+  var targetVol=audioPlayer.volume||0.7;
+  var a=resolvePlayerFor(path);
+  a.volume=0;
+  playFile(path);
+  whenReady(a,function(){
+    if(t!=null&&!isNaN(t))a.currentTime=t;
+    a.volume=0;a.play();
+    fadeVolume(a,0,targetVol,FADE_MS);
+  });
+}
+
+function handleHashCommand(){
+  var hash=window.location.hash;
+  if(!hash||hash.length<2)return;
+  var params;
+  try{params=new URLSearchParams(hash.slice(1));}catch(e){return;}
+  var cmd=params.get('cmd');
+  // 消費済みハッシュはクリアし、同一コマンドの再送でも hashchange が発火するようにする
+  try{history.replaceState(null,'',window.location.pathname+window.location.search);}catch(e){window.location.hash='';}
+  if(!cmd)return;
+  var path=params.get('path'),tRaw=params.get('t'),t=tRaw!==null?parseFloat(tRaw):null;
+  switch(cmd){
+    case'play':cmdPlay();break;
+    case'stop':cmdStop();break;
+    case'playat':cmdPlayAt(path,t);break;
+    case'fadeout':cmdFadeOut();break;
+    case'fadein':cmdFadeIn(path,t);break;
+  }
+}
+window.addEventListener('hashchange',handleHashCommand);
+
+// =========================================================
 // Init
 // =========================================================
 zip.configure({ useWebWorkers: false });
@@ -777,7 +866,7 @@ audioPlayer.volume=0.7;videoPlayer.volume=0.7;
 captureDurationFromPlayer(audioPlayer);
 captureDurationFromPlayer(videoPlayer);
 checkEmbedMode();
-loadFromURLParams();
+loadFromURLParams().then(handleHashCommand);
 </script>
 </body>
 </html>
